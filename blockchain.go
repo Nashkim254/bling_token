@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -27,4 +28,23 @@ func (b Block) CalculateHash() string {
 	blockData := b.previousHash + string(data) + b.timestamp.String() + strconv.Itoa(b.pow)
 	blockHash := sha256.Sum256([]byte(blockData))
 	return fmt.Sprintf("%x", blockHash)
+}
+
+func (b Block) mine(difficulty int) {
+	for !strings.HasPrefix(b.hash, strings.Repeat("0", difficulty)) {
+		b.pow++
+		b.hash = b.CalculateHash()
+	}
+}
+
+func createBlockchain(difficulty int) BlockChain {
+	genesisBlock := Block{
+		hash:      "0",
+		timestamp: time.Now(),
+	}
+	return BlockChain{
+		genesisBlock,
+		[]Block{genesisBlock},
+		difficulty,
+	}
 }
